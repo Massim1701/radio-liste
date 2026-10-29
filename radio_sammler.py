@@ -38,7 +38,7 @@ KANAELE = {
 KANAELE_90 = {
     "90s90s 90s00s": "90s90s", "Eurodance": "eurodance", "HipHop": "hiphop", "RnB": "rnb", "House": "house",
     "Techno": "techno", "Trance": "trance", "Rock": "rock", "Grunge": "grunge", "Lovesongs": "love",
-    "In The Mix": "inthemix", "Digital Web": "pop", "NRW": "nrw",
+    "Digital Web": "pop", "NRW": "nrw",
 }
 QUELLEN = {kennung: ("streams.80s80s.de", kennung) for kennung in KANAELE.values()}
 QUELLEN.update({"90s-" + kennung: ("streams.90s90s.de", kennung) for kennung in KANAELE_90.values()})
