@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Schreibt mit, welcher Interpret/Titel auf den 80s80s-Kanaelen laeuft (nur Text, kein Audio).
+"""Schreibt mit, welcher Interpret/Titel auf den 80s80s- und 90s90s-Kanaelen laeuft (nur Text, kein Audio).
 
 Laeuft als GitHub-Actions-Job (.github/workflows/radio-liste.yml) und sammelt die Liste fuer fornetta;
 Abgleich, Warteliste, Discogs und YouTube-Link macht danach fornetta (tools/songlog_abgleich.py).
@@ -22,7 +22,7 @@ from concurrent.futures import ThreadPoolExecutor
 from datetime import datetime, timezone
 
 INTERVALL = 120  # Sekunden zwischen zwei Durchlaeufen
-THREADS = 8
+THREADS = 12
 
 # Name im Menue von myonlineradio.de -> Kennung im Stream (Prince hat keine oeffentliche Adresse)
 KANAELE = {
@@ -34,12 +34,21 @@ KANAELE = {
     "WGT": "wgt", "Neo": "neo", "Breakdance": "breakdance", "Reggae": "reggae", "Queen": "queen",
     "Pop Stories": "popstories", "Summer": "summerhits", "Xmas": "christmas",
 }
-KEIN_LIED = re.compile(r"^80s80s|werbung|jingle|nachrichten|wetter|verkehr|news|sendung|moderation|gewinnspiel", re.I)
+# 90s90s: gleiche Technik, anderer Server. Schluessel im Ergebnis: "90s-<kennung>" (80s80s-Kanaele behalten ihre Kennung)
+KANAELE_90 = {
+    "90s90s 90s00s": "90s90s", "Eurodance": "eurodance", "HipHop": "hiphop", "RnB": "rnb", "House": "house",
+    "Techno": "techno", "Trance": "trance", "Rock": "rock", "Grunge": "grunge", "Lovesongs": "love",
+    "In The Mix": "inthemix", "Digital Web": "pop", "NRW": "nrw",
+}
+QUELLEN = {kennung: ("streams.80s80s.de", kennung) for kennung in KANAELE.values()}
+QUELLEN.update({"90s-" + kennung: ("streams.90s90s.de", kennung) for kennung in KANAELE_90.values()})
+KEIN_LIED = re.compile(r"^(80s80s|90s90s)|werbung|jingle|nachrichten|wetter|verkehr|news|sendung|moderation|gewinnspiel", re.I)
 
 
-def lese_titel(slug):
+def lese_titel(schluessel):
     """(icy_name, StreamTitle): der Titel kommt nach dem Vorspann (Kanalname) bei etwa Block 58."""
-    req = urllib.request.Request(f"http://streams.80s80s.de/{slug}/mp3-192/homepage/",
+    host, slug = QUELLEN[schluessel]
+    req = urllib.request.Request(f"http://{host}/{slug}/mp3-192/homepage/",
                                  headers={"Icy-MetaData": "1", "User-Agent": "Mozilla/5.0 (driftware-songlist)"})
     r = urllib.request.urlopen(req, timeout=20)
     try:
@@ -102,7 +111,7 @@ def main():
         start = time.time()
         neu = 0
         with ThreadPoolExecutor(THREADS) as ex, open(args.ausgabe, "a", encoding="utf-8") as out:
-            for slug, lied, err in ex.map(abfragen, KANAELE.values()):
+            for slug, lied, err in ex.map(abfragen, QUELLEN):
                 if err:
                     fehler[slug] = fehler.get(slug, 0) + 1
                     if fehler[slug] in (1, 10, 100):

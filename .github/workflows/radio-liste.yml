@@ -1,6 +1,6 @@
 name: Radio-Liste sammeln
 
-# Sammelt, welcher Interpret/Titel auf den 80s80s-Kanaelen laeuft (nur Text, radio_sammler.py) und legt die
+# Sammelt, welcher Interpret/Titel auf den 80s80s- und 90s90s-Kanaelen laeuft (nur Text, radio_sammler.py) und legt die
 # Liste als Datei titel.jsonl in einen GitHub-Release. fornetta holt sie dort ab und macht den Rest
 # (Abgleich mit dem Katalog, Warteliste, Discogs, YouTube-Link, Einsortieren).
 # Der Workflow schreibt nichts ins Repo, nur in den Release (Tag wird beim ersten Lauf angelegt).
@@ -51,7 +51,7 @@ jobs:
           if ! gh release view "$TAG" >/dev/null 2>&1; then
             gh release create "$TAG" --target main --prerelease \
               --title "Radio-Liste (${TAG})" \
-              --notes "Mitgeschriebene Interpreten und Titel der 80s80s-Kanaele (titel.jsonl). Wird automatisch aktualisiert."
+              --notes "Mitgeschriebene Interpreten und Titel der 80s80s- und 90s90s-Kanaele (titel.jsonl). Wird automatisch aktualisiert."
           fi
           gh release download "$TAG" --pattern titel.jsonl --dir . --clobber || true
           touch titel.jsonl
