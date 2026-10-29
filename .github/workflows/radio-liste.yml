@@ -19,8 +19,8 @@ on:
         description: 'Release-Tag fuer die Liste (radio-liste-test zum Testen, radio-liste live)'
         required: false
         default: 'radio-liste-test'
-  # schedule:
-  #   - cron: '5 */6 * * *'   # LIVE: einschalten, dann Standard 345 Minuten und Tag radio-liste
+  schedule:
+    - cron: '5 */6 * * *'   # LIVE: vier Laeufe pro Tag, Standard 345 Minuten und Tag radio-liste
 
 concurrency:
   group: radio-liste
